@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="pawGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B"/>
+      <stop offset="50%" style="stop-color:#FF8E8E"/>
+      <stop offset="100%" style="stop-color:#FFB347"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#pawGrad)"/>
+  <!-- Paw pad -->
+  <ellipse cx="50" cy="58" rx="16" ry="14" fill="white" opacity="0.95"/>
+  <!-- Toes -->
+  <ellipse cx="34" cy="38" rx="8" ry="10" fill="white" opacity="0.95" transform="rotate(-15 34 38)"/>
+  <ellipse cx="66" cy="38" rx="8" ry="10" fill="white" opacity="0.95" transform="rotate(15 66 38)"/>
+  <ellipse cx="44" cy="32" rx="7" ry="9" fill="white" opacity="0.95" transform="rotate(-5 44 32)"/>
+  <ellipse cx="56" cy="32" rx="7" ry="9" fill="white" opacity="0.95" transform="rotate(5 56 32)"/>
+</svg>
