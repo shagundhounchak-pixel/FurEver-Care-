@@ -1,9 +1,61 @@
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../context/AuthContext'
+import { dashboardAPI } from '../../services/api'
+
 function DashboardHome() {
+  const { user } = useAuth()
+  const [dashData, setDashData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const res = await dashboardAPI.get()
+        setDashData(res.data)
+      } catch (err) {
+        console.error('Dashboard fetch error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchDashboard()
+  }, [])
+
+  const firstName = user?.name?.split(' ')[0] || 'there'
+
+  // Determine greeting based on time
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
+
   const stats = [
-    { icon: 'pets', color: 'coral', value: '2', label: 'Active Pets', trend: '+1 this month', trendDir: 'up' },
-    { icon: 'monitor_heart', color: 'teal', value: '92%', label: 'Avg Health Score', trend: '+5% from last month', trendDir: 'up' },
-    { icon: 'calendar_month', color: 'amber', value: '3', label: 'Upcoming Visits', trend: 'Next: Sept 2', trendDir: 'up' },
-    { icon: 'notifications', color: 'purple', value: '7', label: 'Active Reminders', trend: '2 due today', trendDir: 'up' },
+    {
+      icon: 'pets', color: 'coral',
+      value: dashData?.totalPets ?? '—',
+      label: 'Active Pets',
+      trend: dashData?.totalPets ? `${dashData.totalPets} registered` : 'Add a pet to start',
+      trendDir: 'up'
+    },
+    {
+      icon: 'vaccines', color: 'teal',
+      value: dashData?.upcomingVaccinations?.length ?? '—',
+      label: 'Upcoming Vaccines',
+      trend: dashData?.overdueVaccinations ? `${dashData.overdueVaccinations} overdue` : 'All up to date',
+      trendDir: dashData?.overdueVaccinations > 0 ? 'down' : 'up'
+    },
+    {
+      icon: 'calendar_month', color: 'amber',
+      value: dashData?.upcomingAppointments?.length ?? '—',
+      label: 'Upcoming Visits',
+      trend: dashData?.upcomingAppointments?.length ? 'Next visit scheduled' : 'No visits scheduled',
+      trendDir: 'up'
+    },
+    {
+      icon: 'notifications', color: 'purple',
+      value: dashData?.activeReminders ?? '—',
+      label: 'Active Reminders',
+      trend: `${dashData?.activeReminders || 0} active`,
+      trendDir: 'up'
+    },
   ]
 
   const quickActions = [
@@ -12,30 +64,41 @@ function DashboardHome() {
     { icon: 'edit_note', color: 'amber', title: 'Log Activity', description: 'Record today\'s activities' },
   ]
 
-  const activities = [
-    { type: 'health', icon: 'vaccines', title: 'Vaccination Updated', desc: 'Buddy\'s rabies vaccine recorded', time: '2 hours ago' },
-    { type: 'food', icon: 'restaurant', title: 'Feeding Logged', desc: 'Luna\'s morning meal — 150g dry food', time: '4 hours ago' },
-    { type: 'walk', icon: 'directions_walk', title: 'Walk Completed', desc: 'Buddy — 45 min walk at Central Park', time: '6 hours ago' },
-    { type: 'vet', icon: 'local_hospital', title: 'Vet Visit Scheduled', desc: 'Luna\'s checkup — Sept 2, 10:00 AM', time: 'Yesterday' },
-  ]
+  // Format appointments for display
+  const upcomingAppointments = (dashData?.upcomingAppointments || []).map(apt => {
+    const date = new Date(apt.appointmentDate)
+    return {
+      day: String(date.getDate()).padStart(2, '0'),
+      month: date.toLocaleString('en', { month: 'short' }).toUpperCase(),
+      title: `${apt.petId?.name || 'Pet'} — ${apt.reason}`,
+      vet: apt.appointmentTime,
+      status: apt.status
+    }
+  })
 
-  const upcomingAppointments = [
-    { day: '02', month: 'SEP', title: 'Luna\'s Annual Checkup', vet: 'Dr. Sarah Wilson', status: 'upcoming' },
-    { day: '15', month: 'SEP', title: 'Buddy\'s Dental Cleaning', vet: 'Dr. James Lee', status: 'upcoming' },
-    { day: '28', month: 'SEP', title: 'Buddy\'s Follow-up', vet: 'Dr. Sarah Wilson', status: 'upcoming' },
-  ]
+  if (loading) {
+    return (
+      <div className="page-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px' }}>
+        <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--primary)', animation: 'spin 1s linear infinite' }}>
+          pets
+        </span>
+      </div>
+    )
+  }
 
   return (
     <div className="page-content">
       <div className="dashboard-header">
         <div className="dashboard-greeting">
-          <h1>Good Morning, Alex! 👋</h1>
+          <h1>{greeting}, {firstName}! 👋</h1>
           <p>Here&apos;s what&apos;s happening with your pets today.</p>
         </div>
         <div className="dashboard-header-actions">
           <button className="notification-btn" aria-label="Notifications">
             <span className="material-symbols-outlined">notifications</span>
-            <span className="notification-badge">3</span>
+            {dashData?.activeReminders > 0 && (
+              <span className="notification-badge">{dashData.activeReminders}</span>
+            )}
           </button>
         </div>
       </div>
@@ -85,42 +148,55 @@ function DashboardHome() {
             <button className="btn btn-secondary btn-sm">View All</button>
           </div>
           <div className="appointments-list">
-            {upcomingAppointments.map((apt, index) => (
-              <div key={index} className="appointment-card">
-                <div className="appointment-date">
-                  <span className="day">{apt.day}</span>
-                  <span className="month">{apt.month}</span>
+            {upcomingAppointments.length > 0 ? (
+              upcomingAppointments.map((apt, index) => (
+                <div key={index} className="appointment-card">
+                  <div className="appointment-date">
+                    <span className="day">{apt.day}</span>
+                    <span className="month">{apt.month}</span>
+                  </div>
+                  <div className="appointment-info">
+                    <h4>{apt.title}</h4>
+                    <p>{apt.vet}</p>
+                  </div>
+                  <span className={`appointment-status ${apt.status === 'confirmed' ? 'upcoming' : apt.status}`}>
+                    {apt.status}
+                  </span>
                 </div>
-                <div className="appointment-info">
-                  <h4>{apt.title}</h4>
-                  <p>{apt.vet}</p>
-                </div>
-                <span className={`appointment-status ${apt.status}`}>
-                  {apt.status}
-                </span>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
+                No upcoming appointments. Book one to get started!
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Pet Summary */}
         <div className="widget">
           <div className="widget-header">
-            <h3>⚡ Recent Activity</h3>
+            <h3>🐾 Your Pets</h3>
           </div>
           <div className="activity-timeline">
-            {activities.map((activity, index) => (
-              <div key={index} className="activity-item">
-                <div className={`activity-dot ${activity.type}`}>
-                  <span className="material-symbols-outlined">{activity.icon}</span>
+            {(dashData?.pets || []).length > 0 ? (
+              dashData.pets.map((pet, index) => (
+                <div key={index} className="activity-item">
+                  <div className={`activity-dot ${pet.species === 'Dog' ? 'health' : 'food'}`}>
+                    <span className="material-symbols-outlined">
+                      {pet.species === 'Dog' ? 'pets' : pet.species === 'Cat' ? 'pets' : 'cruelty_free'}
+                    </span>
+                  </div>
+                  <div className="activity-info">
+                    <h4>{pet.name}</h4>
+                    <p>{pet.breed || pet.species} · {pet.weight ? `${pet.weight} kg` : 'Weight not set'}</p>
+                  </div>
                 </div>
-                <div className="activity-info">
-                  <h4>{activity.title}</h4>
-                  <p>{activity.desc}</p>
-                  <p style={{ fontSize: '0.75rem', marginTop: '4px', opacity: 0.6 }}>{activity.time}</p>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
+                No pets yet. Add your first furry friend!
+              </p>
+            )}
           </div>
         </div>
       </div>

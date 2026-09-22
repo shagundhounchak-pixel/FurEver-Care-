@@ -1,4 +1,10 @@
+import { useAuth } from '../../context/AuthContext'
+import { useNavigate } from 'react-router-dom'
+
 function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
   const navItems = [
     { id: 'home', icon: 'dashboard', label: 'Dashboard' },
     { id: 'pets', icon: 'pets', label: 'My Pets' },
@@ -6,6 +12,15 @@ function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
     { id: 'appointments', icon: 'calendar_month', label: 'Appointments' },
     { id: 'reminders', icon: 'notifications', label: 'Reminders' },
   ]
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
+  const displayName = user?.name || 'User'
+  const displayEmail = user?.email || ''
+  const initials = displayName.charAt(0).toUpperCase()
 
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
@@ -41,12 +56,39 @@ function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="sidebar-user-avatar">A</div>
+          <div className="sidebar-user-avatar">{initials}</div>
           <div className="sidebar-user-info">
-            <div className="sidebar-user-name">Alex Johnson</div>
-            <div className="sidebar-user-email">alex@email.com</div>
+            <div className="sidebar-user-name">{displayName}</div>
+            <div className="sidebar-user-email">{displayEmail}</div>
           </div>
         </div>
+        {!collapsed && (
+          <button
+            onClick={handleLogout}
+            style={{
+              width: '100%',
+              marginTop: '8px',
+              padding: '8px',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              background: 'none',
+              color: 'var(--text-light)',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontFamily: 'var(--font-body)',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => { e.target.style.color = 'var(--primary)'; e.target.style.borderColor = 'var(--primary)' }}
+            onMouseLeave={e => { e.target.style.color = 'var(--text-light)'; e.target.style.borderColor = 'var(--border)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>logout</span>
+            Sign Out
+          </button>
+        )}
       </div>
     </aside>
   )
