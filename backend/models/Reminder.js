@@ -46,7 +46,6 @@ const reminderSchema = new mongoose.Schema({
   timestamps: true
 })
 
-reminderSchema.index({ userId: 1 })
 reminderSchema.index({ active: 1 })
 
 const Reminder = mongoose.model('Reminder', reminderSchema)

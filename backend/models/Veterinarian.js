@@ -4,8 +4,7 @@ const veterinarianSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'User reference is required'],
-    unique: true
+    required: [true, 'User reference is required']
   },
   specialization: {
     type: String,
@@ -45,7 +44,7 @@ const veterinarianSchema = new mongoose.Schema({
   timestamps: true
 })
 
-veterinarianSchema.index({ userId: 1 })
+veterinarianSchema.index({ userId: 1 }, { unique: true })
 
 const Veterinarian = mongoose.model('Veterinarian', veterinarianSchema)
 export default Veterinarian

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { remindersAPI } from '../../services/api'
 
 function Reminders() {
@@ -11,7 +11,7 @@ function Reminders() {
     recurring: false, frequency: 'once'
   })
 
-  const fetchReminders = async () => {
+  const fetchReminders = useCallback(async () => {
     try {
       const res = await remindersAPI.getAll()
       setReminders(res.data.reminders)
@@ -20,9 +20,10 @@ function Reminders() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { fetchReminders() }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-compiler/react-compiler
+  useEffect(() => { fetchReminders() }, [fetchReminders])
 
   const toggleReminder = async (id) => {
     try {

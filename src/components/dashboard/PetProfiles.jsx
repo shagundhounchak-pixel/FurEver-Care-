@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { petsAPI } from '../../services/api'
 
 function PetProfiles() {
@@ -11,7 +11,7 @@ function PetProfiles() {
     dateOfBirth: '', weight: '', color: '', medicalNotes: ''
   })
 
-  const fetchPets = async () => {
+  const fetchPets = useCallback(async () => {
     try {
       const res = await petsAPI.getAll()
       setPets(res.data.pets)
@@ -20,9 +20,10 @@ function PetProfiles() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { fetchPets() }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-compiler/react-compiler
+  useEffect(() => { fetchPets() }, [fetchPets])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })

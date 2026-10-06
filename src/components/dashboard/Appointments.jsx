@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { appointmentsAPI, petsAPI } from '../../services/api'
 
 function Appointments() {
@@ -12,7 +12,7 @@ function Appointments() {
     appointmentTime: '', veterinarian: '', notes: ''
   })
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [aptRes, petRes] = await Promise.all([
         appointmentsAPI.getAll(),
@@ -28,9 +28,10 @@ function Appointments() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [formData.petId])
 
-  useEffect(() => { fetchData() }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-compiler/react-compiler
+  useEffect(() => { fetchData() }, [fetchData])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
