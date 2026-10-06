@@ -3,6 +3,7 @@ import { petsAPI } from '../../services/api'
 
 function PetProfiles() {
   const [showModal, setShowModal] = useState(false)
+  const [editingPetId, setEditingPetId] = useState(null)
   const [pets, setPets] = useState([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -29,19 +30,48 @@ function PetProfiles() {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
+  const openAddModal = () => {
+    setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '' })
+    setEditingPetId(null)
+    setShowModal(true)
+  }
+
+  const openEditModal = (pet) => {
+    setFormData({
+      name: pet.name || '',
+      species: pet.species || 'Dog',
+      breed: pet.breed || '',
+      gender: pet.gender || 'Unknown',
+      dateOfBirth: pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : '',
+      weight: pet.weight || '',
+      color: pet.color || '',
+      medicalNotes: pet.medicalNotes || ''
+    })
+    setEditingPetId(pet._id)
+    setShowModal(true)
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
     try {
-      await petsAPI.create({
+      const payload = {
         ...formData,
         weight: formData.weight ? parseFloat(formData.weight) : 0
-      })
+      }
+      
+      if (editingPetId) {
+        await petsAPI.update(editingPetId, payload)
+      } else {
+        await petsAPI.create(payload)
+      }
+      
       setShowModal(false)
+      setEditingPetId(null)
       setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '' })
       fetchPets()
     } catch (err) {
-      alert(err.message || 'Failed to add pet')
+      alert(err.message || 'Failed to save pet')
     } finally {
       setSubmitting(false)
     }
@@ -80,7 +110,7 @@ function PetProfiles() {
     <div className="page-content">
       <div className="section-header">
         <h2>🐾 My Pets</h2>
-        <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
+        <button className="btn btn-primary btn-sm" onClick={openAddModal}>
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
           Add Pet
         </button>
@@ -134,21 +164,38 @@ function PetProfiles() {
                   📝 {pet.medicalNotes}
                 </p>
               )}
-              <button
-                onClick={() => handleDelete(pet._id)}
-                style={{
-                  marginTop: '12px', padding: '6px 12px', fontSize: '0.8rem',
-                  border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-                  background: 'none', color: 'var(--text-light)', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-body)',
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary)' }}
-                onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-light)'; e.currentTarget.style.borderColor = 'var(--border)' }}
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete</span>
-                Remove
-              </button>
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                <button
+                  onClick={() => openEditModal(pet)}
+                  style={{
+                    padding: '6px 12px', fontSize: '0.8rem',
+                    border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                    background: 'none', color: 'var(--text-light)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-body)',
+                    transition: 'all 0.2s', flex: 1, justifyContent: 'center'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary)'; e.currentTarget.style.borderColor = 'var(--primary)' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-light)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>edit</span>
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(pet._id)}
+                  style={{
+                    padding: '6px 12px', fontSize: '0.8rem',
+                    border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                    background: 'none', color: 'var(--text-light)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '4px', fontFamily: 'var(--font-body)',
+                    transition: 'all 0.2s', flex: 1, justifyContent: 'center'
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.borderColor = '#ef4444' }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-light)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>delete</span>
+                  Remove
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -156,7 +203,7 @@ function PetProfiles() {
         {/* Add Pet Card */}
         <div
           className="pet-card"
-          onClick={() => setShowModal(true)}
+          onClick={openAddModal}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             minHeight: '400px', cursor: 'pointer',
@@ -176,7 +223,7 @@ function PetProfiles() {
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>🐾 Add New Pet</h2>
+              <h2>{editingPetId ? '🐾 Edit Pet' : '🐾 Add New Pet'}</h2>
               <button className="modal-close" onClick={() => setShowModal(false)}>
                 <span className="material-symbols-outlined">close</span>
               </button>
@@ -243,7 +290,7 @@ function PetProfiles() {
                   <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>
                     {submitting ? 'progress_activity' : 'check'}
                   </span>
-                  {submitting ? 'Adding...' : 'Add Pet'}
+                  {submitting ? 'Saving...' : editingPetId ? 'Save Changes' : 'Add Pet'}
                 </button>
               </div>
             </form>
