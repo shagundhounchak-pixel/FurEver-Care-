@@ -4,6 +4,7 @@ import Sidebar from '../components/dashboard/Sidebar'
 import DashboardHome from '../components/dashboard/DashboardHome'
 import PetProfiles from '../components/dashboard/PetProfiles'
 import HealthTracker from '../components/dashboard/HealthTracker'
+import PawBot from '../components/dashboard/PawBot'
 import AICamera from '../components/dashboard/AICamera'
 import Appointments from '../components/dashboard/Appointments'
 import Reminders from '../components/dashboard/Reminders'
@@ -93,6 +94,9 @@ function Dashboard() {
 
         {renderContent()}
       </main>
+
+      {/* Floating PawBot Chatbot */}
+      <PawBot />
     </div>
   )
 }

@@ -14,6 +14,7 @@ import dashboardRoutes from './routes/dashboardRoutes.js'
 import reminderRoutes from './routes/reminderRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
 import healthCheckRoutes from './routes/healthCheckRoutes.js'
+import pawbotRoutes from './routes/pawbotRoutes.js'
 
 // Load environment variables
 dotenv.config()
@@ -41,6 +42,7 @@ app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/reminders', reminderRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/health-check', healthCheckRoutes)
+app.use('/api/pawbot', pawbotRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {

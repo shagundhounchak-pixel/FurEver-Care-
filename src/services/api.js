@@ -141,3 +141,9 @@ export const healthCheckAPI = {
   analyze: (imageBase64) =>
     request('/health-check/analyze', { method: 'POST', body: JSON.stringify({ imageBase64 }) })
 }
+
+// ─── PawBot (AI Chat) ────────────────────────
+export const pawbotAPI = {
+  chat: (message, history) =>
+    request('/pawbot', { method: 'POST', body: JSON.stringify({ message, history }) })
+}

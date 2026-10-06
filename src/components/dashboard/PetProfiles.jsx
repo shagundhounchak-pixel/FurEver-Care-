@@ -9,7 +9,7 @@ function PetProfiles() {
   const [submitting, setSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     name: '', species: 'Dog', breed: '', gender: 'Unknown',
-    dateOfBirth: '', weight: '', color: '', medicalNotes: ''
+    dateOfBirth: '', weight: '', color: '', medicalNotes: '', profileImage: ''
   })
 
   const fetchPets = useCallback(async () => {
@@ -31,7 +31,7 @@ function PetProfiles() {
   }
 
   const openAddModal = () => {
-    setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '' })
+    setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '', profileImage: '' })
     setEditingPetId(null)
     setShowModal(true)
   }
@@ -45,7 +45,8 @@ function PetProfiles() {
       dateOfBirth: pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : '',
       weight: pet.weight || '',
       color: pet.color || '',
-      medicalNotes: pet.medicalNotes || ''
+      medicalNotes: pet.medicalNotes || '',
+      profileImage: pet.profileImage || ''
     })
     setEditingPetId(pet._id)
     setShowModal(true)
@@ -68,7 +69,7 @@ function PetProfiles() {
       
       setShowModal(false)
       setEditingPetId(null)
-      setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '' })
+      setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '', profileImage: '' })
       fetchPets()
     } catch (err) {
       alert(err.message || 'Failed to save pet')
@@ -121,17 +122,22 @@ function PetProfiles() {
           <div key={pet._id} className="pet-card">
             <div style={{
               width: '100%', height: '200px',
-              background: pet.species === 'Dog' ? 'linear-gradient(135deg, #FF6B6B22, #FF6B6B11)' :
-                pet.species === 'Cat' ? 'linear-gradient(135deg, #4ECDC422, #4ECDC411)' :
-                'linear-gradient(135deg, #FFB34722, #FFB34711)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
+              background: pet.profileImage 
+                ? `url(${pet.profileImage}) center/cover no-repeat` 
+                : (pet.species === 'Dog' ? 'linear-gradient(135deg, #FF6B6B22, #FF6B6B11)' :
+                  pet.species === 'Cat' ? 'linear-gradient(135deg, #4ECDC422, #4ECDC411)' :
+                  'linear-gradient(135deg, #FFB34722, #FFB34711)'),
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0'
             }}>
-              <span className="material-symbols-outlined" style={{
-                fontSize: '64px',
-                color: pet.species === 'Dog' ? 'var(--primary)' : pet.species === 'Cat' ? 'var(--secondary)' : 'var(--accent)'
-              }}>
-                {pet.species === 'Dog' ? 'pets' : pet.species === 'Cat' ? 'pets' : 'cruelty_free'}
-              </span>
+              {!pet.profileImage && (
+                <span className="material-symbols-outlined" style={{
+                  fontSize: '64px',
+                  color: pet.species === 'Dog' ? 'var(--primary)' : pet.species === 'Cat' ? 'var(--secondary)' : 'var(--accent)'
+                }}>
+                  {pet.species === 'Dog' ? 'pets' : pet.species === 'Cat' ? 'pets' : 'cruelty_free'}
+                </span>
+              )}
             </div>
             <div className="pet-card-content">
               <div className="pet-card-header">
@@ -230,6 +236,35 @@ function PetProfiles() {
             </div>
 
             <form onSubmit={handleSubmit}>
+              <div className="form-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                <div style={{ 
+                  width: '120px', height: '120px', borderRadius: '50%', 
+                  background: formData.profileImage ? `url(${formData.profileImage}) center/cover` : 'var(--bg-secondary)',
+                  border: '2px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  overflow: 'hidden', position: 'relative'
+                }}>
+                  {!formData.profileImage && <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--text-light)' }}>add_a_photo</span>}
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0]
+                      if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                          alert('Image must be less than 5MB')
+                          return
+                        }
+                        const reader = new FileReader()
+                        reader.onloadend = () => setFormData(prev => ({ ...prev, profileImage: reader.result }))
+                        reader.readAsDataURL(file)
+                      }
+                    }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+                  />
+                </div>
+                <span style={{ fontSize: '0.85rem', color: 'var(--text-light)' }}>Upload Profile Picture</span>
+              </div>
+
               <div className="form-group">
                 <label>Pet Name</label>
                 <input type="text" name="name" placeholder="e.g., Buddy" value={formData.name} onChange={handleChange} required />
