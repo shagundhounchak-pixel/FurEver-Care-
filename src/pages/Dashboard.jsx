@@ -4,6 +4,7 @@ import Sidebar from '../components/dashboard/Sidebar'
 import DashboardHome from '../components/dashboard/DashboardHome'
 import PetProfiles from '../components/dashboard/PetProfiles'
 import HealthTracker from '../components/dashboard/HealthTracker'
+import AICamera from '../components/dashboard/AICamera'
 import Appointments from '../components/dashboard/Appointments'
 import Reminders from '../components/dashboard/Reminders'
 import '../styles/dashboard.css'
@@ -21,6 +22,8 @@ function Dashboard() {
         return <PetProfiles />
       case 'health':
         return <HealthTracker />
+      case 'ai-checkup':
+        return <AICamera />
       case 'appointments':
         return <Appointments />
       case 'reminders':

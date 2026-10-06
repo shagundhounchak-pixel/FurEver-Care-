@@ -135,3 +135,9 @@ export const remindersAPI = {
   delete: (id) =>
     request(`/reminders/${id}`, { method: 'DELETE' })
 }
+
+// ─── Health Check (AI) ───────────────────────
+export const healthCheckAPI = {
+  analyze: (imageBase64) =>
+    request('/health-check/analyze', { method: 'POST', body: JSON.stringify({ imageBase64 }) })
+}

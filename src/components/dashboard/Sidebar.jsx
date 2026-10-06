@@ -9,6 +9,7 @@ function Sidebar({ activeTab, setActiveTab, collapsed, setCollapsed }) {
     { id: 'home', icon: 'dashboard', label: 'Dashboard' },
     { id: 'pets', icon: 'pets', label: 'My Pets' },
     { id: 'health', icon: 'monitor_heart', label: 'Health' },
+    { id: 'ai-checkup', icon: 'photo_camera', label: 'AI Diagnosis' },
     { id: 'appointments', icon: 'calendar_month', label: 'Appointments' },
     { id: 'reminders', icon: 'notifications', label: 'Reminders' },
   ]

@@ -13,6 +13,7 @@ import veterinarianRoutes from './routes/veterinarianRoutes.js'
 import dashboardRoutes from './routes/dashboardRoutes.js'
 import reminderRoutes from './routes/reminderRoutes.js'
 import adminRoutes from './routes/adminRoutes.js'
+import healthCheckRoutes from './routes/healthCheckRoutes.js'
 
 // Load environment variables
 dotenv.config()
@@ -27,8 +28,8 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }))
-app.use(express.json({ limit: '10mb' }))
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json({ limit: '50mb' })) // increased limit for images
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 
 // API Routes
 app.use('/api/auth', authRoutes)
@@ -39,6 +40,7 @@ app.use('/api/veterinarians', veterinarianRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/reminders', reminderRoutes)
 app.use('/api/admin', adminRoutes)
+app.use('/api/health-check', healthCheckRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
