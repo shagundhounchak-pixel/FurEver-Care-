@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { triggerRipple } from '../utils/animationUtils'
-import CustomCursor from '../components/shared/CustomCursor'
 import '../styles/auth.css'
 
 function LoginPage() {
@@ -30,7 +29,6 @@ function LoginPage() {
 
   return (
     <div className="auth-page">
-      <CustomCursor />
       <div className="auth-card">
         <Link to="/" className="auth-logo">
           <span className="material-symbols-outlined">pets</span>

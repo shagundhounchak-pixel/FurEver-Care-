@@ -472,84 +472,7 @@ input, textarea, select {
   box-shadow: 0 0 8px var(--primary-glow);
 }
 
-/* ============================================================
-   Page Extras: Custom Cursor with Paw Follower
-   ============================================================ */
 
-.custom-cursor-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 99999;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.custom-cursor-container.visible {
-  opacity: 1;
-}
-
-.cursor-dot {
-  position: fixed;
-  top: -4px;
-  left: -4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--primary);
-  pointer-events: none;
-  will-change: transform;
-  z-index: 2;
-  transition: transform 0.04s linear;
-}
-
-.cursor-follower {
-  position: fixed;
-  top: -18px;
-  left: -18px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid var(--primary);
-  background: rgba(37, 99, 235, 0.08);
-  pointer-events: none;
-  will-change: transform;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: width 0.22s ease, height 0.22s ease, background 0.22s ease, border-color 0.22s ease, top 0.22s ease, left 0.22s ease;
-  z-index: 1;
-}
-
-.cursor-follower .cursor-paw-icon {
-  font-size: 14px;
-  color: var(--primary);
-  opacity: 0.75;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.cursor-follower.hovering {
-  top: -25px;
-  left: -25px;
-  width: 50px;
-  height: 50px;
-  background: rgba(37, 99, 235, 0.16);
-  border-color: var(--secondary);
-  transform: scale(1.12);
-}
-
-.cursor-follower.hovering .cursor-paw-icon {
-  transform: scale(1.25) rotate(-8deg);
-  opacity: 1;
-  color: var(--secondary);
-}
-
-.cursor-follower.cursor-clicked {
-  transform: scale(0.85);
-}
 
 /* ============================================================
    Page Extras: Preloader with Walking Paws
@@ -808,7 +731,6 @@ input, textarea, select {
     transform: none !important;
   }
 
-  .custom-cursor-container,
   .page-loader-overlay {
     display: none !important;
   }
@@ -825,9 +747,5 @@ input, textarea, select {
 
   .container {
     padding: 0 var(--space-md);
-  }
-
-  .custom-cursor-container {
-    display: none !important;
   }
 }

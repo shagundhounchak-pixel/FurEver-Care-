@@ -8,7 +8,6 @@ import PawBot from '../components/dashboard/PawBot'
 import AICamera from '../components/dashboard/AICamera'
 import Appointments from '../components/dashboard/Appointments'
 import Reminders from '../components/dashboard/Reminders'
-import CustomCursor from '../components/shared/CustomCursor'
 import ScrollProgressBar from '../components/shared/ScrollProgressBar'
 import '../styles/dashboard.css'
 
@@ -39,7 +38,6 @@ function Dashboard() {
   return (
     <div className={`dashboard-layout ${collapsed ? 'collapsed' : ''}`}>
       <ScrollProgressBar />
-      <CustomCursor />
 
       {/* Mobile Overlay */}
       {mobileOpen && (

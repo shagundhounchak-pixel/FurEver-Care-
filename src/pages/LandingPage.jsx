@@ -9,7 +9,6 @@ import Testimonials from '../components/landing/Testimonials'
 import Pricing from '../components/landing/Pricing'
 import Footer from '../components/landing/Footer'
 import ScrollProgressBar from '../components/shared/ScrollProgressBar'
-import CustomCursor from '../components/shared/CustomCursor'
 import PageLoader from '../components/shared/PageLoader'
 import { prefersReducedMotion } from '../utils/animationUtils'
 import '../styles/landing.css'
@@ -84,10 +83,9 @@ function LandingPage() {
 
   return (
     <div className="landing-page">
-      {/* Page Extras: Preloader, Scroll Progress Bar & Custom Cursor */}
+      {/* Page Extras: Preloader & Scroll Progress Bar */}
       <PageLoader />
       <ScrollProgressBar />
-      <CustomCursor />
 
       {/* Main Landing Page Structure */}
       <Navbar />
