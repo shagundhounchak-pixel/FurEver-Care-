@@ -1,0 +1,2 @@
+# Cloudflare Pages / Workers redirects
+# SPA routing is automatically handled by single-page-application mode in wrangler.jsonc
