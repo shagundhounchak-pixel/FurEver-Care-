@@ -4,68 +4,82 @@
    ============================================================ */
 
 :root {
-  /* --- Primary Accent: Calming Sage Green (WCAG AA compliant, >5.4:1 ratio) --- */
-  --primary: #2D6A4F;
-  --primary-hover: #22543D;
-  --primary-dark: #1B4332;
-  --primary-light: #40916C;
-  --primary-surface: #EBF5F0;
-  --primary-surface-strong: #D8EDE3;
-  --primary-border: rgba(45, 106, 79, 0.22);
-  --primary-glow: rgba(45, 106, 79, 0.16);
+  /* --- Primary Accent: Electric Cobalt Blue (Bold, energetic, WCAG AA compliant: 4.6:1 ratio) --- */
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-dark: #1E40AF;
+  --primary-light: #3B82F6;
+  --primary-surface: #EFF6FF;
+  --primary-surface-strong: #DBEAFE;
+  --primary-border: rgba(37, 99, 235, 0.22);
+  --primary-glow: rgba(37, 99, 235, 0.20);
 
-  /* --- Secondary Accent: Warm Terracotta Peach (used sparingly, >4.6:1 ratio) --- */
-  --secondary: #D97736;
-  --secondary-hover: #BD6328;
-  --secondary-dark: #A5511D;
-  --secondary-light: #E68D53;
-  --secondary-surface: #FDF3EB;
-  --secondary-border: rgba(217, 119, 54, 0.22);
-  --secondary-glow: rgba(217, 119, 54, 0.16);
+  /* --- Secondary Accent & CTA: Vibrant Coral (High-contrast CTA & highlights, 4.52:1 ratio) --- */
+  --secondary: #FF5A36;
+  --secondary-hover: #E04624;
+  --secondary-dark: #C53718;
+  --secondary-light: #FF7654;
+  --secondary-surface: #FFF1EE;
+  --secondary-surface-strong: #FFE3DC;
+  --secondary-border: rgba(255, 90, 54, 0.24);
+  --secondary-glow: rgba(255, 90, 54, 0.22);
+
+  /* --- Dark Contrast Elements (Navbar & Footer: Deep Slate for bold visual punch) --- */
+  --dark-nav: #0B0F19;
+  --dark-nav-glass: rgba(11, 15, 25, 0.94);
+  --dark-nav-border: rgba(255, 255, 255, 0.08);
+  --dark-footer: #0B0F19;
+  --dark-footer-border: rgba(255, 255, 255, 0.08);
+  --text-on-dark: #F8FAFC;
+  --text-muted-on-dark: #94A3B8;
 
   /* --- Semantic / Accents --- */
-  --accent: #D97736;
-  --accent-surface: #FDF3EB;
-  --success: #2D6A4F;
-  --warning: #C07D38;
-  --danger: #C24141;
-  --danger-surface: #FDF2F2;
-  --info: #356E7F;
+  --accent: #FF5A36;
+  --accent-surface: #FFF1EE;
+  --success: #059669;
+  --success-surface: #ECFDF5;
+  --warning: #D97706;
+  --warning-surface: #FFFBEB;
+  --danger: #DC2626;
+  --danger-surface: #FEF2F2;
+  --info: #0284C7;
+  --info-surface: #F0F9FF;
 
-  /* --- Light & Minimal Neutrals --- */
-  --bg: #FAFAF8;
-  --bg-secondary: #F4F4F0;
+  /* --- Light & Crisp Slate Neutrals --- */
+  --bg: #F8FAFC;
+  --bg-secondary: #F1F5F9;
   --bg-card: #FFFFFF;
-  --bg-subtle: #EEEEEE;
+  --bg-subtle: #E2E8F0;
   --bg-glass: rgba(255, 255, 255, 0.88);
   --bg-glass-strong: rgba(255, 255, 255, 0.96);
 
-  /* --- Typography: Clear Dark Grey Hierarchy (no pure black) --- */
-  --text-heading: #181E1B;
-  --text: #37413C;
-  --text-main: #37413C;
-  --text-light: #66726B;
-  --text-muted: #66726B;
+  /* --- Typography: Crisp Dark Navy Slate Hierarchy (WCAG AAA contrast on light canvas) --- */
+  --text-heading: #0F172A;
+  --text: #334155;
+  --text-main: #334155;
+  --text-light: #64748B;
+  --text-muted: #64748B;
   --text-on-primary: #FFFFFF;
+  --text-on-secondary: #FFFFFF;
 
-  /* --- Subtle Hairline Borders & Dividers --- */
-  --border: #E6E6E1;
-  --border-light: #ECECE7;
-  --border-hover: #D4D4CD;
+  /* --- Crisp Hairline Borders & Dividers --- */
+  --border: #E2E8F0;
+  --border-light: #EDF2F7;
+  --border-hover: #CBD5E1;
 
-  /* --- Very Light, Refined Shadows --- */
-  --shadow-xs: 0 1px 2px rgba(24, 30, 27, 0.03);
-  --shadow-sm: 0 1px 3px rgba(24, 30, 27, 0.04), 0 1px 2px rgba(24, 30, 27, 0.02);
-  --shadow-md: 0 4px 16px rgba(24, 30, 27, 0.05), 0 1px 3px rgba(24, 30, 27, 0.02);
-  --shadow-lg: 0 12px 32px rgba(24, 30, 27, 0.06), 0 2px 6px rgba(24, 30, 27, 0.02);
-  --shadow-xl: 0 20px 48px rgba(24, 30, 27, 0.07);
-  --shadow-glow-primary: 0 4px 16px rgba(45, 106, 79, 0.16);
-  --shadow-glow-secondary: 0 4px 16px rgba(217, 119, 54, 0.16);
+  /* --- Refined Modern Shadows & Colored Glows --- */
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.09), 0 2px 6px rgba(15, 23, 42, 0.03);
+  --shadow-xl: 0 20px 48px rgba(15, 23, 42, 0.11);
+  --shadow-glow-primary: 0 4px 18px rgba(37, 99, 235, 0.24);
+  --shadow-glow-secondary: 0 4px 18px rgba(255, 90, 54, 0.28);
 
-  /* --- Calm Minimal Gradients --- */
-  --gradient-primary: linear-gradient(135deg, #2D6A4F 0%, #3B7E61 100%);
-  --gradient-secondary: linear-gradient(135deg, #D97736 0%, #E3874B 100%);
-  --gradient-hero: linear-gradient(180deg, #FAFAF8 0%, #F5F5F0 60%, #FAFAF8 100%);
+  /* --- Bold Modern Gradients --- */
+  --gradient-primary: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+  --gradient-secondary: linear-gradient(135deg, #FF5A36 0%, #FF7654 100%);
+  --gradient-hero: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 60%, #F8FAFC 100%);
   --gradient-card: #FFFFFF;
   --gradient-glass: rgba(255, 255, 255, 0.92);
 
@@ -318,7 +332,7 @@ input, textarea, select {
 }
 
 .btn-secondary .btn-ripple {
-  background: rgba(45, 106, 79, 0.2);
+  background: rgba(37, 99, 235, 0.18);
 }
 
 @keyframes rippleAnimation {
@@ -356,7 +370,21 @@ input, textarea, select {
   background: var(--primary-surface);
 }
 
-/* Button Pulsing Glow Effect */
+/* High-Contrast Secondary CTA Button */
+.btn-cta {
+  background: var(--secondary);
+  color: var(--text-on-secondary);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-cta:hover {
+  background: var(--secondary-hover);
+  color: var(--text-on-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-glow-secondary);
+}
+
+/* Button Pulsing Glow Effect (Vibrant Coral Ring) */
 .btn-pulse-glow {
   position: relative;
 }
@@ -366,7 +394,7 @@ input, textarea, select {
   position: absolute;
   inset: -3px;
   border-radius: inherit;
-  background: var(--primary);
+  background: var(--secondary);
   opacity: 0.35;
   z-index: -1;
   animation: pulseGlowRing 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
@@ -486,7 +514,7 @@ input, textarea, select {
   height: 36px;
   border-radius: 50%;
   border: 1.5px solid var(--primary);
-  background: rgba(45, 106, 79, 0.06);
+  background: rgba(37, 99, 235, 0.08);
   pointer-events: none;
   will-change: transform;
   display: flex;
@@ -499,7 +527,7 @@ input, textarea, select {
 .cursor-follower .cursor-paw-icon {
   font-size: 14px;
   color: var(--primary);
-  opacity: 0.65;
+  opacity: 0.75;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
@@ -508,14 +536,15 @@ input, textarea, select {
   left: -25px;
   width: 50px;
   height: 50px;
-  background: rgba(45, 106, 79, 0.12);
-  border-color: var(--primary);
+  background: rgba(37, 99, 235, 0.16);
+  border-color: var(--secondary);
   transform: scale(1.12);
 }
 
 .cursor-follower.hovering .cursor-paw-icon {
   transform: scale(1.25) rotate(-8deg);
   opacity: 1;
+  color: var(--secondary);
 }
 
 .cursor-follower.cursor-clicked {
