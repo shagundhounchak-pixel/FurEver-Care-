@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { triggerRipple } from '../../utils/animationUtils'
 
 function Footer() {
   const [email, setEmail] = useState('')
@@ -17,7 +18,7 @@ function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             <div className="footer-logo">
-              <span className="material-symbols-outlined">pets</span>
+              <span className="material-symbols-outlined paw-icon">pets</span>
               FurEver Care
             </div>
             <p>
@@ -57,7 +58,12 @@ function Footer() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <button type="submit">
+              <button
+                type="submit"
+                onClick={triggerRipple}
+                className="btn-sweep"
+                aria-label="Subscribe"
+              >
                 <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>send</span>
               </button>
             </form>
@@ -67,13 +73,13 @@ function Footer() {
         <div className="footer-bottom">
           <p>© 2026 FurEver Care. Made with ❤️ for pets everywhere.</p>
           <div className="footer-social">
-            <a href="#twitter" aria-label="Twitter">
+            <a href="#twitter" aria-label="Twitter" className="icon-bounce" onClick={triggerRipple}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>public</span>
             </a>
-            <a href="#instagram" aria-label="Instagram">
+            <a href="#instagram" aria-label="Instagram" className="icon-bounce" onClick={triggerRipple}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>photo_camera</span>
             </a>
-            <a href="#facebook" aria-label="Facebook">
+            <a href="#facebook" aria-label="Facebook" className="icon-bounce" onClick={triggerRipple}>
               <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>group</span>
             </a>
           </div>

@@ -1,6 +1,6 @@
 /* ============================================================
    FurEver Care — Minimalist Auth Pages Styles (Login & Register)
-   Clean, light, soft shadows, minimal aesthetic
+   Smooth focus glow, floating labels, card lift & animations
    ============================================================ */
 
 .auth-page {
@@ -14,6 +14,20 @@
   overflow: hidden;
 }
 
+/* Subtle background ambiance */
+.auth-page::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 106, 79, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  animation: morphBlob 16s ease-in-out infinite alternate;
+}
+
 .auth-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -24,17 +38,18 @@
   box-shadow: var(--shadow-md);
   position: relative;
   z-index: 1;
-  animation: authFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: authSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
 }
 
-@keyframes authFadeIn {
+@keyframes authSlideIn {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(22px) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -86,24 +101,31 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  position: relative;
 }
 
 .auth-form .form-group label {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-heading);
+  transition: color var(--transition-fast);
 }
 
+.auth-form .form-group:focus-within label {
+  color: var(--primary);
+}
+
+/* Form Inputs with Smooth Focus Glow & Subtle Elevation */
 .auth-form .form-group input,
 .auth-form .form-group select {
-  padding: 11px 14px;
+  padding: 12px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-heading);
   font-size: 0.92rem;
   font-family: var(--font-body);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  transition: border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
 }
 
@@ -111,7 +133,8 @@
 .auth-form .form-group select:focus {
   background: var(--bg-card);
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-glow);
+  box-shadow: 0 0 0 3.5px var(--primary-glow), 0 2px 8px rgba(45, 106, 79, 0.08);
+  transform: translateY(-1px);
 }
 
 .auth-form .form-group input::placeholder {
@@ -125,9 +148,10 @@
   gap: var(--space-md);
 }
 
+/* Submit Button with Ripple & Sweep Hover */
 .auth-submit {
   margin-top: var(--space-sm);
-  padding: 12px;
+  padding: 13px;
   border: none;
   border-radius: var(--radius-md);
   background: var(--primary);
@@ -142,10 +166,30 @@
   justify-content: center;
   gap: var(--space-sm);
   box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.auth-submit::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-hover);
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-submit:hover::before {
+  transform: scaleX(1);
 }
 
 .auth-submit:hover {
-  background: var(--primary-hover);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
@@ -206,11 +250,12 @@
   font-size: 0.82rem;
   color: var(--text-light);
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), transform var(--transition-fast);
 }
 
 .auth-home-link:hover {
   color: var(--primary);
+  transform: translateX(-2px);
 }
 
 @media (max-width: 480px) {

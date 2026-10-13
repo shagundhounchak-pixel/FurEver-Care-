@@ -1,4 +1,9 @@
+import { useEffect, useRef } from 'react'
+import { attach3DTilt } from '../../utils/animationUtils'
+
 function HowItWorks() {
+  const cardsRef = useRef([])
+
   const steps = [
     {
       icon: 'person_add',
@@ -20,6 +25,11 @@ function HowItWorks() {
     }
   ]
 
+  useEffect(() => {
+    const cleanups = cardsRef.current.map((card) => attach3DTilt(card, 8))
+    return () => cleanups.forEach((cleanup) => cleanup && cleanup())
+  }, [])
+
   return (
     <section className="how-it-works-section section" id="how-it-works">
       <div className="container">
@@ -38,10 +48,14 @@ function HowItWorks() {
 
         <div className="steps-container">
           {steps.map((step, index) => (
-            <div key={index} className="step-card">
-              <div className="step-number">
+            <div
+              key={index}
+              ref={(el) => (cardsRef.current[index] = el)}
+              className="step-card tilt-card"
+            >
+              <div className="step-number icon-bounce">
                 <span className="material-symbols-outlined">{step.icon}</span>
-                <div className="step-label">{step.label}</div>
+                <div className="step-label pulse-badge">{step.label}</div>
               </div>
               <h3>{step.title}</h3>
               <p>{step.description}</p>

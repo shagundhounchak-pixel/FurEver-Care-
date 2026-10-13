@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { dashboardAPI } from '../../services/api'
+import { attach3DTilt, triggerRipple } from '../../utils/animationUtils'
 
 function DashboardHome() {
   const { user } = useAuth()
   const [dashData, setDashData] = useState(null)
   const [loading, setLoading] = useState(true)
+  const statCardsRef = useRef([])
+  const actionCardsRef = useRef([])
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -20,6 +23,19 @@ function DashboardHome() {
     }
     fetchDashboard()
   }, [])
+
+  // Attach 3D tilt to cards
+  useEffect(() => {
+    const cleanups = []
+    statCardsRef.current.forEach((el) => {
+      if (el) cleanups.push(attach3DTilt(el, 6))
+    })
+    actionCardsRef.current.forEach((el) => {
+      if (el) cleanups.push(attach3DTilt(el, 6))
+    })
+
+    return () => cleanups.forEach((c) => c && c())
+  }, [dashData])
 
   const firstName = user?.name?.split(' ')[0] || 'there'
 
@@ -94,7 +110,11 @@ function DashboardHome() {
           <p>Here&apos;s what&apos;s happening with your pets today.</p>
         </div>
         <div className="dashboard-header-actions">
-          <button className="notification-btn" aria-label="Notifications">
+          <button
+            className="notification-btn"
+            aria-label="Notifications"
+            onClick={triggerRipple}
+          >
             <span className="material-symbols-outlined">notifications</span>
             {dashData?.activeReminders > 0 && (
               <span className="notification-badge">{dashData.activeReminders}</span>
@@ -103,11 +123,15 @@ function DashboardHome() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats with 3D Tilt */}
       <div className="stats-grid">
         {stats.map((stat, index) => (
-          <div key={index} className="stat-card">
-            <div className={`stat-icon ${stat.color}`}>
+          <div
+            key={index}
+            ref={(el) => (statCardsRef.current[index] = el)}
+            className="stat-card tilt-card"
+          >
+            <div className={`stat-icon ${stat.color} icon-bounce`}>
               <span className="material-symbols-outlined">{stat.icon}</span>
             </div>
             <div className="stat-content">
@@ -124,11 +148,16 @@ function DashboardHome() {
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions with 3D Tilt */}
       <div className="quick-actions">
         {quickActions.map((action, index) => (
-          <div key={index} className="quick-action-card">
-            <div className={`quick-action-icon stat-icon ${action.color}`}>
+          <div
+            key={index}
+            ref={(el) => (actionCardsRef.current[index] = el)}
+            className="quick-action-card tilt-card"
+            onClick={triggerRipple}
+          >
+            <div className={`quick-action-icon stat-icon ${action.color} icon-bounce`}>
               <span className="material-symbols-outlined">{action.icon}</span>
             </div>
             <div>
@@ -145,7 +174,9 @@ function DashboardHome() {
         <div className="widget">
           <div className="widget-header">
             <h3>📅 Upcoming Appointments</h3>
-            <button className="btn btn-secondary btn-sm">View All</button>
+            <button className="btn btn-secondary btn-sm btn-sweep" onClick={triggerRipple}>
+              View All
+            </button>
           </div>
           <div className="appointments-list">
             {upcomingAppointments.length > 0 ? (
@@ -181,7 +212,7 @@ function DashboardHome() {
             {(dashData?.pets || []).length > 0 ? (
               dashData.pets.map((pet, index) => (
                 <div key={index} className="activity-item">
-                  <div className={`activity-dot ${pet.species === 'Dog' ? 'health' : 'food'}`}>
+                  <div className={`activity-dot ${pet.species === 'Dog' ? 'health' : 'food'} icon-bounce`}>
                     <span className="material-symbols-outlined">
                       {pet.species === 'Dog' ? 'pets' : pet.species === 'Cat' ? 'pets' : 'cruelty_free'}
                     </span>

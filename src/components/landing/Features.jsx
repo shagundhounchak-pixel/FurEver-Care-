@@ -1,4 +1,9 @@
+import { useEffect, useRef } from 'react'
+import { attach3DTilt } from '../../utils/animationUtils'
+
 function Features() {
+  const cardsRef = useRef([])
+
   const features = [
     {
       icon: 'monitor_heart',
@@ -38,6 +43,12 @@ function Features() {
     }
   ]
 
+  // Attach 3D tilt effect on mouse movement with soft glare
+  useEffect(() => {
+    const cleanups = cardsRef.current.map((card) => attach3DTilt(card, 8))
+    return () => cleanups.forEach((cleanup) => cleanup && cleanup())
+  }, [])
+
   return (
     <section className="features-section section" id="features">
       <div className="container">
@@ -58,10 +69,11 @@ function Features() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="feature-card"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              ref={(el) => (cardsRef.current[index] = el)}
+              className="feature-card tilt-card"
+              style={{ animationDelay: `${index * 0.08}s` }}
             >
-              <div className={`feature-icon ${feature.color}`}>
+              <div className={`feature-icon ${feature.color} icon-bounce`}>
                 <span className="material-symbols-outlined">{feature.icon}</span>
               </div>
               <h3>{feature.title}</h3>

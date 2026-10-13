@@ -1,7 +1,11 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
+import { attach3DTilt, attachMagnetic, triggerRipple } from '../../utils/animationUtils'
 
 function Testimonials() {
   const trackRef = useRef(null)
+  const cardsRef = useRef([])
+  const leftBtnRef = useRef(null)
+  const rightBtnRef = useRef(null)
 
   const testimonials = [
     {
@@ -41,6 +45,18 @@ function Testimonials() {
     }
   ]
 
+  useEffect(() => {
+    const cardCleanups = cardsRef.current.map((card) => attach3DTilt(card, 6))
+    const leftCleanup = attachMagnetic(leftBtnRef.current, 0.3)
+    const rightCleanup = attachMagnetic(rightBtnRef.current, 0.3)
+
+    return () => {
+      cardCleanups.forEach((c) => c && c())
+      if (leftCleanup) leftCleanup()
+      if (rightCleanup) rightCleanup()
+    }
+  }, [])
+
   const scroll = (direction) => {
     if (trackRef.current) {
       const scrollAmount = 380
@@ -70,15 +86,19 @@ function Testimonials() {
         <div style={{ position: 'relative' }}>
           <div className="testimonials-track" ref={trackRef}>
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="testimonial-card">
+              <div
+                key={index}
+                ref={(el) => (cardsRef.current[index] = el)}
+                className="testimonial-card tilt-card"
+              >
                 <div className="testimonial-stars">
                   {[...Array(5)].map((_, i) => (
                     <span
                       key={i}
-                      className="material-symbols-outlined"
+                      className="material-symbols-outlined star-icon"
                       style={{
                         fontVariationSettings: i < testimonial.rating ? "'FILL' 1" : "'FILL' 0",
-                        opacity: i < testimonial.rating ? 1 : 0.3
+                        opacity: i < testimonial.rating ? 1 : 0.25
                       }}
                     >
                       star
@@ -87,14 +107,7 @@ function Testimonials() {
                 </div>
                 <p className="testimonial-text">{testimonial.text}</p>
                 <div className="testimonial-author">
-                  <div className="testimonial-avatar" style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '24px',
-                    background: 'var(--bg-secondary)',
-                    borderColor: 'var(--primary-glow)'
-                  }}>
+                  <div className="testimonial-avatar icon-bounce">
                     {testimonial.avatar}
                   </div>
                   <div className="testimonial-info">
@@ -113,7 +126,8 @@ function Testimonials() {
             marginTop: '24px'
           }}>
             <button
-              onClick={() => scroll('left')}
+              ref={leftBtnRef}
+              onClick={(e) => { triggerRipple(e); scroll('left'); }}
               className="btn btn-secondary btn-sm"
               style={{ width: '44px', height: '44px', padding: 0, borderRadius: '50%' }}
               aria-label="Scroll left"
@@ -121,7 +135,8 @@ function Testimonials() {
               <span className="material-symbols-outlined">chevron_left</span>
             </button>
             <button
-              onClick={() => scroll('right')}
+              ref={rightBtnRef}
+              onClick={(e) => { triggerRipple(e); scroll('right'); }}
               className="btn btn-secondary btn-sm"
               style={{ width: '44px', height: '44px', padding: 0, borderRadius: '50%' }}
               aria-label="Scroll right"

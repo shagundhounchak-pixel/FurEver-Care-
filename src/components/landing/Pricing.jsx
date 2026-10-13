@@ -1,4 +1,10 @@
+import { useEffect, useRef } from 'react'
+import { attach3DTilt, triggerRipple } from '../../utils/animationUtils'
+import AnimatedCheckmark from '../shared/AnimatedCheckmark'
+
 function Pricing() {
+  const cardsRef = useRef([])
+
   const plans = [
     {
       name: 'Free',
@@ -17,7 +23,7 @@ function Pricing() {
         { text: 'Priority Support', available: false }
       ],
       buttonText: 'Get Started',
-      buttonClass: 'btn btn-secondary',
+      buttonClass: 'btn btn-secondary btn-sweep',
       popular: false
     },
     {
@@ -37,7 +43,7 @@ function Pricing() {
         { text: 'Priority Support', available: false }
       ],
       buttonText: 'Start Free Trial',
-      buttonClass: 'btn btn-primary',
+      buttonClass: 'btn btn-primary btn-sweep btn-pulse-glow',
       popular: true
     },
     {
@@ -57,10 +63,16 @@ function Pricing() {
         { text: '24/7 Priority Support', available: true }
       ],
       buttonText: 'Start Free Trial',
-      buttonClass: 'btn btn-secondary',
+      buttonClass: 'btn btn-secondary btn-sweep',
       popular: false
     }
   ]
+
+  // Attach 3D tilt with soft reflection
+  useEffect(() => {
+    const cleanups = cardsRef.current.map((card) => attach3DTilt(card, 7))
+    return () => cleanups.forEach((cleanup) => cleanup && cleanup())
+  }, [])
 
   return (
     <section className="pricing-section section" id="pricing">
@@ -80,9 +92,13 @@ function Pricing() {
 
         <div className="pricing-grid">
           {plans.map((plan, index) => (
-            <div key={index} className={`pricing-card ${plan.popular ? 'popular' : ''}`}>
-              {plan.popular && <div className="pricing-badge">🔥 Most Popular</div>}
-              <div className={`pricing-icon ${plan.iconColor}`}>
+            <div
+              key={index}
+              ref={(el) => (cardsRef.current[index] = el)}
+              className={`pricing-card tilt-card ${plan.popular ? 'popular' : ''}`}
+            >
+              {plan.popular && <div className="pricing-badge pulse-badge">🔥 Most Popular</div>}
+              <div className={`pricing-icon ${plan.iconColor} icon-bounce`}>
                 <span className="material-symbols-outlined">{plan.icon}</span>
               </div>
               <h3 className="pricing-name">{plan.name}</h3>
@@ -95,14 +111,19 @@ function Pricing() {
               <ul className="pricing-features">
                 {plan.features.map((feature, i) => (
                   <li key={i}>
-                    <span className={`material-symbols-outlined ${!feature.available ? 'disabled' : ''}`}>
-                      {feature.available ? 'check_circle' : 'cancel'}
-                    </span>
+                    {feature.available ? (
+                      <AnimatedCheckmark size={18} color="var(--primary)" />
+                    ) : (
+                      <span className="material-symbols-outlined disabled">cancel</span>
+                    )}
                     {feature.text}
                   </li>
                 ))}
               </ul>
-              <button className={plan.buttonClass}>
+              <button
+                className={plan.buttonClass}
+                onClick={triggerRipple}
+              >
                 {plan.buttonText}
               </button>
             </div>

@@ -12,7 +12,7 @@
   --primary-surface: #EBF5F0;
   --primary-surface-strong: #D8EDE3;
   --primary-border: rgba(45, 106, 79, 0.22);
-  --primary-glow: rgba(45, 106, 79, 0.12);
+  --primary-glow: rgba(45, 106, 79, 0.16);
 
   /* --- Secondary Accent: Warm Terracotta Peach (used sparingly, >4.6:1 ratio) --- */
   --secondary: #D97736;
@@ -21,7 +21,7 @@
   --secondary-light: #E68D53;
   --secondary-surface: #FDF3EB;
   --secondary-border: rgba(217, 119, 54, 0.22);
-  --secondary-glow: rgba(217, 119, 54, 0.12);
+  --secondary-glow: rgba(217, 119, 54, 0.16);
 
   /* --- Semantic / Accents --- */
   --accent: #D97736;
@@ -53,7 +53,7 @@
   --border-light: #ECECE7;
   --border-hover: #D4D4CD;
 
-  /* --- Very Light, Refined Shadows (replaces heavy glowing borders) --- */
+  /* --- Very Light, Refined Shadows --- */
   --shadow-xs: 0 1px 2px rgba(24, 30, 27, 0.03);
   --shadow-sm: 0 1px 3px rgba(24, 30, 27, 0.04), 0 1px 2px rgba(24, 30, 27, 0.02);
   --shadow-md: 0 4px 16px rgba(24, 30, 27, 0.05), 0 1px 3px rgba(24, 30, 27, 0.02);
@@ -103,10 +103,6 @@
   --sidebar-width: 256px;
   --sidebar-collapsed: 76px;
 }
-
-/* ============================================================
-   Reset & Base Styles
-   ============================================================ */
 
 *, *::before, *::after {
   margin: 0;
@@ -242,14 +238,13 @@ input, textarea, select {
   text-align: center;
 }
 
-/* Clean text accent (replaces loud gradient) */
 .text-gradient {
   color: var(--primary);
   font-weight: 700;
 }
 
 /* ============================================================
-   Buttons & Interactive Elements
+   Buttons & Interactive Elements (With Ripple & Sweep)
    ============================================================ */
 
 .btn {
@@ -266,6 +261,7 @@ input, textarea, select {
   position: relative;
   border: 1px solid transparent;
   will-change: transform;
+  overflow: hidden;
 }
 
 .btn:active {
@@ -311,22 +307,107 @@ input, textarea, select {
   border-radius: var(--radius-md);
 }
 
-/* Minimal Card Base */
+/* Button Click Ripple */
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: rippleAnimation 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+.btn-secondary .btn-ripple {
+  background: rgba(45, 106, 79, 0.2);
+}
+
+@keyframes rippleAnimation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Button Colour-Fill Sweep on Hover */
+.btn-sweep {
+  position: relative;
+  z-index: 1;
+}
+
+.btn-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-hover);
+  z-index: -1;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-sweep:hover::before {
+  transform: scaleX(1);
+}
+
+.btn-secondary.btn-sweep::before {
+  background: var(--primary-surface);
+}
+
+/* Button Pulsing Glow Effect */
+.btn-pulse-glow {
+  position: relative;
+}
+
+.btn-pulse-glow::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  background: var(--primary);
+  opacity: 0.35;
+  z-index: -1;
+  animation: pulseGlowRing 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+@keyframes pulseGlowRing {
+  0% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.06); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+/* 3D Tilt Card Base & Glare Overlay */
 .card,
-.glass-card {
+.glass-card,
+.tilt-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   transition: transform var(--transition-base), box-shadow var(--transition-base), border-color var(--transition-base);
   will-change: transform;
+  position: relative;
+  overflow: hidden;
 }
 
 .glass-card:hover,
-.card:hover {
-  transform: translateY(-2px);
+.card:hover,
+.tilt-card:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--border-hover);
+}
+
+.card-glare {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
 }
 
 /* Material Symbols Outlined Icon Tuning */
@@ -336,40 +417,263 @@ input, textarea, select {
   font-style: normal;
   font-size: 22px;
   line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
   display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
   vertical-align: middle;
 }
 
 /* ============================================================
-   Tasteful & Performant Animations (Transform & Opacity Only)
+   Page Extras: Scroll Progress Bar
+   ============================================================ */
+
+.scroll-progress-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 10001;
+  pointer-events: none;
+  background: transparent;
+}
+
+.scroll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+  transition: width 0.1s ease-out;
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+
+/* ============================================================
+   Page Extras: Custom Cursor with Paw Follower
+   ============================================================ */
+
+.custom-cursor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.custom-cursor-container.visible {
+  opacity: 1;
+}
+
+.cursor-dot {
+  position: fixed;
+  top: -4px;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  pointer-events: none;
+  will-change: transform;
+  z-index: 2;
+  transition: transform 0.04s linear;
+}
+
+.cursor-follower {
+  position: fixed;
+  top: -18px;
+  left: -18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--primary);
+  background: rgba(45, 106, 79, 0.06);
+  pointer-events: none;
+  will-change: transform;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.22s ease, height 0.22s ease, background 0.22s ease, border-color 0.22s ease, top 0.22s ease, left 0.22s ease;
+  z-index: 1;
+}
+
+.cursor-follower .cursor-paw-icon {
+  font-size: 14px;
+  color: var(--primary);
+  opacity: 0.65;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.cursor-follower.hovering {
+  top: -25px;
+  left: -25px;
+  width: 50px;
+  height: 50px;
+  background: rgba(45, 106, 79, 0.12);
+  border-color: var(--primary);
+  transform: scale(1.12);
+}
+
+.cursor-follower.hovering .cursor-paw-icon {
+  transform: scale(1.25) rotate(-8deg);
+  opacity: 1;
+}
+
+.cursor-follower.cursor-clicked {
+  transform: scale(0.85);
+}
+
+/* ============================================================
+   Page Extras: Preloader with Walking Paws
+   ============================================================ */
+
+.page-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.page-loader-overlay.fade-out {
+  opacity: 0;
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.page-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.walking-paws {
+  display: flex;
+  gap: 12px;
+}
+
+.walking-paws .paw {
+  font-size: 26px;
+  color: var(--primary);
+  opacity: 0;
+  transform: scale(0.6) translateY(8px);
+  animation: pawWalkStep 1.2s infinite ease-in-out;
+}
+
+.walking-paws .paw-1 { animation-delay: 0.1s; }
+.walking-paws .paw-2 { animation-delay: 0.3s; }
+.walking-paws .paw-3 { animation-delay: 0.5s; }
+.walking-paws .paw-4 { animation-delay: 0.7s; }
+
+@keyframes pawWalkStep {
+  0% { opacity: 0; transform: scale(0.6) translateY(8px); }
+  35% { opacity: 1; transform: scale(1.1) translateY(0); }
+  70% { opacity: 0.4; transform: scale(0.9) translateY(0); }
+  100% { opacity: 0; transform: scale(0.6) translateY(8px); }
+}
+
+.loader-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.loader-text {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+}
+
+.loader-spinner-bar {
+  width: 90px;
+  height: 3px;
+  background: var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.loader-spinner-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 36px;
+  background: var(--primary);
+  border-radius: var(--radius-full);
+  animation: loaderBarMove 1s infinite ease-in-out;
+}
+
+@keyframes loaderBarMove {
+  0% { transform: translateX(-36px); }
+  50% { transform: translateX(65px); }
+  100% { transform: translateX(100px); }
+}
+
+/* ============================================================
+   Page Extras: Animated SVG Checkmark
+   ============================================================ */
+
+.animated-checkmark {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 63;
+  stroke-dashoffset: 63;
+  animation: drawCircle 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.checkmark-check {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: drawCheck 0.35s 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Service & Feature Icon Bounce */
+.icon-bounce {
+  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tilt-card:hover .icon-bounce,
+.icon-bounce:hover {
+  transform: scale(1.15) rotate(-6deg);
+}
+
+/* Subtle Badge Pulse */
+.pulse-badge {
+  animation: subtleBadgePulse 2.8s ease-in-out infinite;
+}
+
+@keyframes subtleBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ============================================================
+   Tasteful Keyframe Animations
    ============================================================ */
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeIn {
@@ -377,59 +681,22 @@ input, textarea, select {
   to { opacity: 1; }
 }
 
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-/* Subtle, tasteful pet paw wiggle on hover/micro-action */
 @keyframes pawWiggle {
   0%, 100% { transform: rotate(0deg); }
   25% { transform: rotate(-8deg); }
   75% { transform: rotate(8deg); }
 }
 
-/* Gentle pulse for notifications or active states */
-@keyframes subtlePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.85; transform: scale(1.04); }
-}
-
-/* Smooth minimal spinner */
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
-/* Subtle floating micro-movement for cards */
 @keyframes gentleFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
@@ -447,31 +714,6 @@ input, textarea, select {
   animation: gentleFloat 5s ease-in-out infinite;
 }
 
-/* Stagger Animation Delays */
-.delay-1 { animation-delay: 0.08s; }
-.delay-2 { animation-delay: 0.16s; }
-.delay-3 { animation-delay: 0.24s; }
-.delay-4 { animation-delay: 0.32s; }
-.delay-5 { animation-delay: 0.40s; }
-.delay-6 { animation-delay: 0.48s; }
-
-/* ============================================================
-   Scroll Reveal (Viewport Intersection)
-   ============================================================ */
-
-.reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Logo Paw Interactive Touch */
 .paw-icon {
   display: inline-block;
   transition: transform var(--transition-bounce), color var(--transition-fast);
@@ -532,8 +774,14 @@ input, textarea, select {
   .hero-floating-card,
   .btn:hover,
   .card:hover,
-  .glass-card:hover {
+  .glass-card:hover,
+  .tilt-card:hover {
     transform: none !important;
+  }
+
+  .custom-cursor-container,
+  .page-loader-overlay {
+    display: none !important;
   }
 }
 
@@ -548,5 +796,9 @@ input, textarea, select {
 
   .container {
     padding: 0 var(--space-md);
+  }
+
+  .custom-cursor-container {
+    display: none !important;
   }
 }
