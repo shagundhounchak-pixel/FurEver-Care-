@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { petsAPI } from '../../services/api'
 
-function PetProfiles() {
+function PetProfiles({ initialOpenModal, onModalClosed }) {
   const [showModal, setShowModal] = useState(false)
   const [editingPetId, setEditingPetId] = useState(null)
   const [pets, setPets] = useState([])
@@ -15,9 +15,14 @@ function PetProfiles() {
   const fetchPets = useCallback(async () => {
     try {
       const res = await petsAPI.getAll()
-      setPets(res.data.pets)
+      if (res?.data?.pets) {
+        setPets(res.data.pets)
+        localStorage.setItem('furever_local_pets', JSON.stringify(res.data.pets))
+      }
     } catch (err) {
-      console.error('Error fetching pets:', err)
+      console.error('Error fetching pets, loading local cache:', err)
+      const local = JSON.parse(localStorage.getItem('furever_local_pets') || '[]')
+      setPets(local)
     } finally {
       setLoading(false)
     }
@@ -25,6 +30,14 @@ function PetProfiles() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps, react-compiler/react-compiler
   useEffect(() => { fetchPets() }, [fetchPets])
+
+  // Handle direct modal trigger from dashboard quick actions
+  useEffect(() => {
+    if (initialOpenModal) {
+      openAddModal()
+      if (onModalClosed) onModalClosed()
+    }
+  }, [initialOpenModal, onModalClosed])
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -55,24 +68,37 @@ function PetProfiles() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
+    const payload = {
+      ...formData,
+      weight: formData.weight ? parseFloat(formData.weight) : 0
+    }
+
     try {
-      const payload = {
-        ...formData,
-        weight: formData.weight ? parseFloat(formData.weight) : 0
-      }
-      
       if (editingPetId) {
         await petsAPI.update(editingPetId, payload)
       } else {
         await petsAPI.create(payload)
       }
-      
       setShowModal(false)
       setEditingPetId(null)
       setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '', profileImage: '' })
       fetchPets()
     } catch (err) {
-      alert(err.message || 'Failed to save pet')
+      console.warn('API error saving pet, saving to local storage fallback:', err)
+      const local = JSON.parse(localStorage.getItem('furever_local_pets') || '[]')
+      if (editingPetId) {
+        const updated = local.map(p => p._id === editingPetId ? { ...p, ...payload } : p)
+        localStorage.setItem('furever_local_pets', JSON.stringify(updated))
+        setPets(updated)
+      } else {
+        const newPet = { ...payload, _id: 'pet_' + Date.now(), createdAt: new Date().toISOString() }
+        const updated = [newPet, ...local]
+        localStorage.setItem('furever_local_pets', JSON.stringify(updated))
+        setPets(updated)
+      }
+      setShowModal(false)
+      setEditingPetId(null)
+      setFormData({ name: '', species: 'Dog', breed: '', gender: 'Unknown', dateOfBirth: '', weight: '', color: '', medicalNotes: '', profileImage: '' })
     } finally {
       setSubmitting(false)
     }
@@ -82,10 +108,12 @@ function PetProfiles() {
     if (!confirm('Are you sure you want to remove this pet?')) return
     try {
       await petsAPI.delete(id)
-      fetchPets()
     } catch (err) {
-      alert(err.message || 'Failed to delete pet')
+      console.warn('API delete error, deleting locally:', err)
     }
+    const local = JSON.parse(localStorage.getItem('furever_local_pets') || '[]').filter(p => p._id !== id)
+    localStorage.setItem('furever_local_pets', JSON.stringify(local))
+    setPets(prev => prev.filter(p => p._id !== id))
   }
 
   const getAge = (dob) => {

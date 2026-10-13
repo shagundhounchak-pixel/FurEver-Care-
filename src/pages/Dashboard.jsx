@@ -15,23 +15,77 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState('home')
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [initialModal, setInitialModal] = useState(null)
+
+  const handleAction = (action) => {
+    if (action === 'add-pet') {
+      setActiveTab('pets')
+      setInitialModal('add-pet')
+    } else if (action === 'schedule-visit') {
+      setActiveTab('appointments')
+      setInitialModal('new-appointment')
+    } else if (action === 'log-activity') {
+      setActiveTab('health')
+      setInitialModal('add-record')
+    } else if (action === 'view-appointments') {
+      setActiveTab('appointments')
+    } else if (action === 'view-reminders') {
+      setActiveTab('reminders')
+    } else if (action === 'view-pets') {
+      setActiveTab('pets')
+    } else if (action === 'view-health') {
+      setActiveTab('health')
+    }
+  }
 
   const renderContent = () => {
     switch (activeTab) {
       case 'home':
-        return <DashboardHome />
+        return (
+          <DashboardHome
+            setActiveTab={setActiveTab}
+            onAction={handleAction}
+          />
+        )
       case 'pets':
-        return <PetProfiles />
+        return (
+          <PetProfiles
+            initialOpenModal={initialModal === 'add-pet'}
+            onModalClosed={() => setInitialModal(null)}
+          />
+        )
       case 'health':
-        return <HealthTracker />
+        return (
+          <HealthTracker
+            initialOpenModal={initialModal === 'add-record'}
+            onModalClosed={() => setInitialModal(null)}
+            setActiveTab={setActiveTab}
+          />
+        )
       case 'ai-checkup':
         return <AICamera />
       case 'appointments':
-        return <Appointments />
+        return (
+          <Appointments
+            initialOpenModal={initialModal === 'new-appointment'}
+            onModalClosed={() => setInitialModal(null)}
+            setActiveTab={setActiveTab}
+          />
+        )
       case 'reminders':
-        return <Reminders />
+        return (
+          <Reminders
+            initialOpenModal={initialModal === 'add-reminder'}
+            onModalClosed={() => setInitialModal(null)}
+          />
+        )
       default:
-        return <DashboardHome />
+        return (
+          <DashboardHome
+            setActiveTab={setActiveTab}
+            onAction={handleAction}
+          />
+        )
     }
   }
 

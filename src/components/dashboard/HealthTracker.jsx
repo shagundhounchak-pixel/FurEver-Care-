@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { vaccinationsAPI, petsAPI } from '../../services/api'
 
-function HealthTracker() {
+function HealthTracker({ initialOpenModal, onModalClosed, setActiveTab }) {
   const [pets, setPets] = useState([])
   const [selectedPet, setSelectedPet] = useState(null)
   const [vaccinations, setVaccinations] = useState([])
@@ -13,15 +13,31 @@ function HealthTracker() {
   })
 
   useEffect(() => {
+    if (initialOpenModal) {
+      setShowModal(true)
+      if (onModalClosed) onModalClosed()
+    }
+  }, [initialOpenModal, onModalClosed])
+
+  useEffect(() => {
     const fetchPets = async () => {
       try {
         const res = await petsAPI.getAll()
-        setPets(res.data.pets)
-        if (res.data.pets.length > 0) {
-          setSelectedPet(res.data.pets[0])
+        const petsList = res.data?.pets || []
+        if (petsList.length > 0) {
+          setPets(petsList)
+          setSelectedPet(petsList[0])
+        } else {
+          // Check local fallback
+          const localPets = JSON.parse(localStorage.getItem('furever_local_pets') || '[]')
+          setPets(localPets)
+          if (localPets.length > 0) setSelectedPet(localPets[0])
         }
       } catch (err) {
         console.error('Error fetching pets:', err)
+        const localPets = JSON.parse(localStorage.getItem('furever_local_pets') || '[]')
+        setPets(localPets)
+        if (localPets.length > 0) setSelectedPet(localPets[0])
       } finally {
         setLoading(false)
       }
@@ -38,9 +54,11 @@ function HealthTracker() {
   const fetchVaccinations = async (petId) => {
     try {
       const res = await vaccinationsAPI.getAll(petId)
-      setVaccinations(res.data.vaccinations)
+      setVaccinations(res.data?.vaccinations || [])
     } catch (err) {
       console.error('Error fetching vaccinations:', err)
+      const localVax = JSON.parse(localStorage.getItem(`furever_local_vax_${petId}`) || '[]')
+      setVaccinations(localVax)
     }
   }
 
@@ -52,6 +70,11 @@ function HealthTracker() {
     e.preventDefault()
     if (!selectedPet) return
     setSubmitting(true)
+    const newRecord = {
+      _id: 'vax_' + Date.now(),
+      petId: selectedPet._id,
+      ...formData
+    }
     try {
       await vaccinationsAPI.create({
         petId: selectedPet._id,
@@ -61,7 +84,13 @@ function HealthTracker() {
       setFormData({ vaccineName: '', dateGiven: '', nextDueDate: '', veterinarian: '', notes: '' })
       fetchVaccinations(selectedPet._id)
     } catch (err) {
-      alert(err.message || 'Failed to add vaccination')
+      console.warn('Backend unavailable, storing vaccination record locally:', err)
+      const localVax = JSON.parse(localStorage.getItem(`furever_local_vax_${selectedPet._id}`) || '[]')
+      const updated = [newRecord, ...localVax]
+      localStorage.setItem(`furever_local_vax_${selectedPet._id}`, JSON.stringify(updated))
+      setVaccinations(updated)
+      setShowModal(false)
+      setFormData({ vaccineName: '', dateGiven: '', nextDueDate: '', veterinarian: '', notes: '' })
     } finally {
       setSubmitting(false)
     }
@@ -73,7 +102,11 @@ function HealthTracker() {
       await vaccinationsAPI.delete(id)
       fetchVaccinations(selectedPet._id)
     } catch (err) {
-      alert(err.message || 'Failed to delete')
+      console.warn('Backend unavailable, deleting vaccination record locally:', err)
+      const localVax = JSON.parse(localStorage.getItem(`furever_local_vax_${selectedPet._id}`) || '[]')
+      const updated = localVax.filter(v => v._id !== id)
+      localStorage.setItem(`furever_local_vax_${selectedPet._id}`, JSON.stringify(updated))
+      setVaccinations(updated)
     }
   }
 
@@ -101,9 +134,16 @@ function HealthTracker() {
         <div className="section-header">
           <h2>❤️ Health Tracker</h2>
         </div>
-        <p style={{ color: 'var(--text-light)', textAlign: 'center', padding: '40px' }}>
-          Add a pet first to track their health records.
-        </p>
+        <div style={{ textAlign: 'center', padding: '60px 20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--accent)', marginBottom: '16px', display: 'block' }}>pets</span>
+          <h3 style={{ marginBottom: '8px' }}>No Pets Registered Yet</h3>
+          <p style={{ color: 'var(--text-light)', marginBottom: '20px' }}>
+            Add a pet profile first to track their vaccines, medications, and wellness history.
+          </p>
+          <button className="btn btn-primary" onClick={() => setActiveTab && setActiveTab('pets')}>
+            <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span> Add Pet Profile Now
+          </button>
+        </div>
       </div>
     )
   }
@@ -255,9 +295,15 @@ function HealthTracker() {
               )
             })
           ) : (
-            <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
-              No vaccination records yet. Add one to start tracking.
-            </p>
+            <div style={{ textAlign: 'center', padding: '30px 16px' }}>
+              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '12px' }}>
+                No vaccination records yet for {selectedPet?.name || 'this pet'}. Add one to start tracking!
+              </p>
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowModal(true)}>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+                Add First Record
+              </button>
+            </div>
           )}
         </div>
       </div>

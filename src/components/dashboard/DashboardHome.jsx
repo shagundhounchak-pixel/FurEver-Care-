@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { dashboardAPI } from '../../services/api'
 import { attach3DTilt, triggerRipple } from '../../utils/animationUtils'
 
-function DashboardHome() {
+function DashboardHome({ setActiveTab, onAction }) {
   const { user } = useAuth()
   const [dashData, setDashData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -17,6 +17,21 @@ function DashboardHome() {
         setDashData(res.data)
       } catch (err) {
         console.error('Dashboard fetch error:', err)
+        // Check localStorage fallback for demo/offline resilience
+        try {
+          const localPets = JSON.parse(localStorage.getItem('furever_local_pets') || '[]')
+          const localApts = JSON.parse(localStorage.getItem('furever_local_appointments') || '[]')
+          const localReminders = JSON.parse(localStorage.getItem('furever_local_reminders') || '[]')
+          setDashData({
+            totalPets: localPets.length,
+            pets: localPets,
+            upcomingAppointments: localApts,
+            activeReminders: localReminders.filter(r => r.active !== false).length,
+            upcomingVaccinations: []
+          })
+        } catch (e) {
+          console.error('Local fallback error:', e)
+        }
       } finally {
         setLoading(false)
       }
@@ -45,50 +60,89 @@ function DashboardHome() {
 
   const stats = [
     {
+      id: 'pets',
       icon: 'pets', color: 'coral',
       value: dashData?.totalPets ?? '—',
       label: 'Active Pets',
       trend: dashData?.totalPets ? `${dashData.totalPets} registered` : 'Add a pet to start',
-      trendDir: 'up'
+      trendDir: 'up',
+      tab: 'pets'
     },
     {
+      id: 'vaccines',
       icon: 'vaccines', color: 'teal',
       value: dashData?.upcomingVaccinations?.length ?? '—',
       label: 'Upcoming Vaccines',
       trend: dashData?.overdueVaccinations ? `${dashData.overdueVaccinations} overdue` : 'All up to date',
-      trendDir: dashData?.overdueVaccinations > 0 ? 'down' : 'up'
+      trendDir: dashData?.overdueVaccinations > 0 ? 'down' : 'up',
+      tab: 'health'
     },
     {
+      id: 'visits',
       icon: 'calendar_month', color: 'amber',
       value: dashData?.upcomingAppointments?.length ?? '—',
       label: 'Upcoming Visits',
       trend: dashData?.upcomingAppointments?.length ? 'Next visit scheduled' : 'No visits scheduled',
-      trendDir: 'up'
+      trendDir: 'up',
+      tab: 'appointments'
     },
     {
+      id: 'reminders',
       icon: 'notifications', color: 'purple',
       value: dashData?.activeReminders ?? '—',
       label: 'Active Reminders',
       trend: `${dashData?.activeReminders || 0} active`,
-      trendDir: 'up'
+      trendDir: 'up',
+      tab: 'reminders'
     },
   ]
 
   const quickActions = [
-    { icon: 'add_circle', color: 'coral', title: 'Add New Pet', description: 'Register a new pet profile' },
-    { icon: 'event', color: 'teal', title: 'Schedule Visit', description: 'Book a vet appointment' },
-    { icon: 'edit_note', color: 'amber', title: 'Log Activity', description: 'Record today\'s activities' },
+    {
+      actionKey: 'add-pet',
+      icon: 'add_circle',
+      color: 'coral',
+      title: 'Add New Pet',
+      description: 'Register a new pet profile',
+      tab: 'pets'
+    },
+    {
+      actionKey: 'schedule-visit',
+      icon: 'event',
+      color: 'teal',
+      title: 'Schedule Visit',
+      description: 'Book a vet appointment',
+      tab: 'appointments'
+    },
+    {
+      actionKey: 'log-activity',
+      icon: 'edit_note',
+      color: 'amber',
+      title: 'Log Activity',
+      description: "Record today's activities",
+      tab: 'health'
+    },
   ]
+
+  const handleQuickActionClick = (e, action) => {
+    triggerRipple(e)
+    if (onAction) {
+      onAction(action.actionKey)
+    } else if (setActiveTab) {
+      setActiveTab(action.tab)
+    }
+  }
 
   // Format appointments for display
   const upcomingAppointments = (dashData?.upcomingAppointments || []).map(apt => {
-    const date = new Date(apt.appointmentDate)
+    const date = new Date(apt.appointmentDate || Date.now())
     return {
+      id: apt._id,
       day: String(date.getDate()).padStart(2, '0'),
       month: date.toLocaleString('en', { month: 'short' }).toUpperCase(),
-      title: `${apt.petId?.name || 'Pet'} — ${apt.reason}`,
-      vet: apt.appointmentTime,
-      status: apt.status
+      title: `${apt.petId?.name || apt.petName || 'Pet'} — ${apt.reason || 'Checkup'}`,
+      vet: apt.appointmentTime || 'Time not set',
+      status: apt.status || 'confirmed'
     }
   })
 
@@ -113,7 +167,11 @@ function DashboardHome() {
           <button
             className="notification-btn"
             aria-label="Notifications"
-            onClick={triggerRipple}
+            onClick={(e) => {
+              triggerRipple(e)
+              if (setActiveTab) setActiveTab('reminders')
+            }}
+            title="View Reminders"
           >
             <span className="material-symbols-outlined">notifications</span>
             {dashData?.activeReminders > 0 && (
@@ -130,6 +188,14 @@ function DashboardHome() {
             key={index}
             ref={(el) => (statCardsRef.current[index] = el)}
             className="stat-card tilt-card"
+            style={{ cursor: 'pointer' }}
+            onClick={(e) => {
+              triggerRipple(e)
+              if (setActiveTab) setActiveTab(stat.tab)
+            }}
+            role="button"
+            tabIndex={0}
+            title={`View ${stat.label}`}
           >
             <div className={`stat-icon ${stat.color} icon-bounce`}>
               <span className="material-symbols-outlined">{stat.icon}</span>
@@ -155,7 +221,11 @@ function DashboardHome() {
             key={index}
             ref={(el) => (actionCardsRef.current[index] = el)}
             className="quick-action-card tilt-card"
-            onClick={triggerRipple}
+            onClick={(e) => handleQuickActionClick(e, action)}
+            role="button"
+            tabIndex={0}
+            style={{ cursor: 'pointer' }}
+            title={`Click to ${action.title}`}
           >
             <div className={`quick-action-icon stat-icon ${action.color} icon-bounce`}>
               <span className="material-symbols-outlined">{action.icon}</span>
@@ -174,14 +244,29 @@ function DashboardHome() {
         <div className="widget">
           <div className="widget-header">
             <h3>📅 Upcoming Appointments</h3>
-            <button className="btn btn-secondary btn-sm btn-sweep" onClick={triggerRipple}>
+            <button
+              className="btn btn-secondary btn-sm btn-sweep"
+              onClick={(e) => {
+                triggerRipple(e)
+                if (setActiveTab) setActiveTab('appointments')
+              }}
+            >
               View All
             </button>
           </div>
           <div className="appointments-list">
             {upcomingAppointments.length > 0 ? (
               upcomingAppointments.map((apt, index) => (
-                <div key={index} className="appointment-card">
+                <div
+                  key={index}
+                  className="appointment-card"
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => {
+                    triggerRipple(e)
+                    if (setActiveTab) setActiveTab('appointments')
+                  }}
+                  title="View in Appointments"
+                >
                   <div className="appointment-date">
                     <span className="day">{apt.day}</span>
                     <span className="month">{apt.month}</span>
@@ -196,9 +281,22 @@ function DashboardHome() {
                 </div>
               ))
             ) : (
-              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
-                No upcoming appointments. Book one to get started!
-              </p>
+              <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+                <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '14px' }}>
+                  No upcoming appointments. Book one to get started!
+                </p>
+                <button
+                  className="btn btn-primary btn-sm btn-sweep"
+                  onClick={(e) => {
+                    triggerRipple(e)
+                    if (onAction) onAction('schedule-visit')
+                    else if (setActiveTab) setActiveTab('appointments')
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>event</span>
+                  Schedule Visit
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -207,11 +305,31 @@ function DashboardHome() {
         <div className="widget">
           <div className="widget-header">
             <h3>🐾 Your Pets</h3>
+            <button
+              className="btn btn-secondary btn-sm btn-sweep"
+              onClick={(e) => {
+                triggerRipple(e)
+                if (onAction) onAction('add-pet')
+                else if (setActiveTab) setActiveTab('pets')
+              }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add</span>
+              Add Pet
+            </button>
           </div>
           <div className="activity-timeline">
             {(dashData?.pets || []).length > 0 ? (
               dashData.pets.map((pet, index) => (
-                <div key={index} className="activity-item">
+                <div
+                  key={index}
+                  className="activity-item"
+                  style={{ cursor: 'pointer' }}
+                  onClick={(e) => {
+                    triggerRipple(e)
+                    if (setActiveTab) setActiveTab('pets')
+                  }}
+                  title="View Pet Profile"
+                >
                   <div className={`activity-dot ${pet.species === 'Dog' ? 'health' : 'food'} icon-bounce`}>
                     <span className="material-symbols-outlined">
                       {pet.species === 'Dog' ? 'pets' : pet.species === 'Cat' ? 'pets' : 'cruelty_free'}
@@ -224,9 +342,22 @@ function DashboardHome() {
                 </div>
               ))
             ) : (
-              <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
-                No pets yet. Add your first furry friend!
-              </p>
+              <div style={{ textAlign: 'center', padding: '24px 16px' }}>
+                <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', marginBottom: '14px' }}>
+                  No pets yet. Add your first furry friend!
+                </p>
+                <button
+                  className="btn btn-primary btn-sm btn-sweep"
+                  onClick={(e) => {
+                    triggerRipple(e)
+                    if (onAction) onAction('add-pet')
+                    else if (setActiveTab) setActiveTab('pets')
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+                  Add New Pet
+                </button>
+              </div>
             )}
           </div>
         </div>

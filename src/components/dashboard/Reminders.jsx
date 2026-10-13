@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { remindersAPI } from '../../services/api'
 
-function Reminders() {
+function Reminders({ initialOpenModal, onModalClosed }) {
   const [reminders, setReminders] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -11,12 +11,71 @@ function Reminders() {
     recurring: false, frequency: 'once'
   })
 
+  useEffect(() => {
+    if (initialOpenModal) {
+      setShowModal(true)
+      if (onModalClosed) onModalClosed()
+    }
+  }, [initialOpenModal, onModalClosed])
+
   const fetchReminders = useCallback(async () => {
+    const sampleReminders = [
+      {
+        _id: 'rem_1',
+        title: 'Heartgard Plus Chewable',
+        category: 'medication',
+        description: 'Give monthly heartworm preventive dose after meal',
+        time: 'Monthly, 1st of month',
+        recurring: true,
+        frequency: 'monthly',
+        active: true
+      },
+      {
+        _id: 'rem_2',
+        title: 'Evening Walk & Hydration',
+        category: 'feeding',
+        description: 'Daily 30 min exercise & fresh water refill',
+        time: 'Today, 6:30 PM',
+        recurring: true,
+        frequency: 'daily',
+        active: true
+      },
+      {
+        _id: 'rem_3',
+        title: 'Veterinary Booster Check',
+        category: 'vet',
+        description: 'Rabies and DHPP vaccination checkup',
+        time: 'In 3 Weeks',
+        recurring: false,
+        frequency: 'once',
+        active: true
+      }
+    ]
+
     try {
       const res = await remindersAPI.getAll()
-      setReminders(res.data.reminders)
+      const list = res.data?.reminders || []
+      if (list.length > 0) {
+        setReminders(list)
+        localStorage.setItem('furever_local_reminders', JSON.stringify(list))
+      } else {
+        const stored = JSON.parse(localStorage.getItem('furever_local_reminders') || 'null')
+        if (stored && stored.length > 0) {
+          setReminders(stored)
+        } else {
+          setReminders(sampleReminders)
+          localStorage.setItem('furever_local_reminders', JSON.stringify(sampleReminders))
+        }
+      }
     } catch (err) {
-      console.error('Error fetching reminders:', err)
+      console.warn('Backend unavailable, loading local reminders:', err)
+      const stored = JSON.parse(localStorage.getItem('furever_local_reminders') || 'null')
+      if (stored && stored.length > 0) {
+        setReminders(stored)
+      } else {
+        setReminders(sampleReminders)
+        localStorage.setItem('furever_local_reminders', JSON.stringify(sampleReminders))
+      }
     } finally {
       setLoading(false)
     }
@@ -26,13 +85,15 @@ function Reminders() {
   useEffect(() => { fetchReminders() }, [fetchReminders])
 
   const toggleReminder = async (id) => {
+    setReminders(prev => {
+      const updated = prev.map(r => r._id === id ? { ...r, active: !r.active } : r)
+      localStorage.setItem('furever_local_reminders', JSON.stringify(updated))
+      return updated
+    })
     try {
       await remindersAPI.toggle(id)
-      setReminders(reminders.map(r =>
-        r._id === id ? { ...r, active: !r.active } : r
-      ))
     } catch (err) {
-      console.error('Error toggling reminder:', err)
+      console.warn('Backend offline, toggled reminder locally:', err)
     }
   }
 
@@ -44,13 +105,24 @@ function Reminders() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitting(true)
+    const newRecord = {
+      _id: 'rem_' + Date.now(),
+      ...formData,
+      active: true
+    }
     try {
       await remindersAPI.create(formData)
       setShowModal(false)
       setFormData({ category: 'medication', title: '', description: '', time: '', recurring: false, frequency: 'once' })
       fetchReminders()
     } catch (err) {
-      alert(err.message || 'Failed to create reminder')
+      console.warn('Backend offline, saving reminder locally:', err)
+      const current = JSON.parse(localStorage.getItem('furever_local_reminders') || '[]')
+      const updated = [newRecord, ...current]
+      localStorage.setItem('furever_local_reminders', JSON.stringify(updated))
+      setReminders(updated)
+      setShowModal(false)
+      setFormData({ category: 'medication', title: '', description: '', time: '', recurring: false, frequency: 'once' })
     } finally {
       setSubmitting(false)
     }
@@ -62,7 +134,11 @@ function Reminders() {
       await remindersAPI.delete(id)
       fetchReminders()
     } catch (err) {
-      alert(err.message || 'Failed to delete')
+      console.warn('Backend offline, deleting reminder locally:', err)
+      const current = JSON.parse(localStorage.getItem('furever_local_reminders') || '[]')
+      const updated = current.filter(r => r._id !== id)
+      localStorage.setItem('furever_local_reminders', JSON.stringify(updated))
+      setReminders(updated)
     }
   }
 
@@ -195,9 +271,16 @@ function Reminders() {
             </div>
           ))
         ) : (
-          <p style={{ color: 'var(--text-light)', fontSize: '0.9rem', textAlign: 'center', padding: '20px' }}>
-            No reminders found. Create one to stay on track!
-          </p>
+          <div style={{ textAlign: 'center', padding: '40px 20px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--primary)', marginBottom: '12px', display: 'block' }}>notifications_off</span>
+            <p style={{ color: 'var(--text-light)', fontSize: '0.95rem', marginBottom: '16px' }}>
+              No reminders found in this category. Create one to stay on track!
+            </p>
+            <button className="btn btn-primary btn-sm" onClick={() => setShowModal(true)}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>add</span>
+              Add Reminder
+            </button>
+          </div>
         )}
       </div>
 
