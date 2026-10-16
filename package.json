@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "clean": "node scripts/clean.js",
-    "build": "node scripts/clean.js && vite build && node scripts/postbuild.js",
+    "prebuild": "node scripts/clean.js",
+    "build": "vite build",
+    "postbuild": "node scripts/postbuild.js",
     "lint": "oxlint",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler deploy"
