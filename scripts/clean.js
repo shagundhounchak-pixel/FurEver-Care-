@@ -3,12 +3,17 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', 'dist')
-const publicRedirects = path.resolve(__dirname, '..', 'public', '_redirects')
+const rootDir = path.resolve(__dirname, '..')
+const distDir = path.resolve(rootDir, 'dist')
+const publicDir = path.resolve(rootDir, 'public')
 
-if (fs.existsSync(publicRedirects)) {
-  fs.unlinkSync(publicRedirects)
-  console.log('[clean] Removed offending public/_redirects file.')
+// Check and remove any offending _redirects file from root, public, and dist
+for (const dir of [rootDir, publicDir, distDir]) {
+  const file = path.join(dir, '_redirects')
+  if (fs.existsSync(file)) {
+    fs.unlinkSync(file)
+    console.log(`[clean] Removed offending _redirects file from ${dir}`)
+  }
 }
 
 if (fs.existsSync(distDir)) {

@@ -7,7 +7,7 @@
     "dev": "vite",
     "clean": "node scripts/clean.js",
     "prebuild": "node scripts/clean.js",
-    "build": "vite build",
+    "build": "node scripts/clean.js && vite build && node scripts/postbuild.js",
     "postbuild": "node scripts/postbuild.js",
     "lint": "oxlint",
     "preview": "vite preview",
